@@ -94,7 +94,7 @@ public class Main extends Application {
         winLayout.setStyle("-fx-background-color: #323437;");
         winLayout.setAlignment(Pos.CENTER);
 
-        Text winTitle = new Text("YOU WIN!");
+        Text winTitle = new Text("TEST FINISHED");
         winTitle.setFill(Color.web("#e2b714"));
         winTitle.setStyle("-fx-font-size: 48px; -fx-font-weight: bold;");
 
