@@ -17,4 +17,4 @@ A sleek, fast-paced typing game built with **JavaFX** and **Maven**. Test your s
 ### Running the Game
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/YOUR_USERNAME/QuickType.git](https://github.com/YOUR_USERNAME/QuickType.git)
+   git clone (https://github.com/YOUR_USERNAME/QuickType.git)
