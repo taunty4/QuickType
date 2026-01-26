@@ -21,7 +21,7 @@ A simple typing game built with **JavaFX** and **Maven**. Test your speed and ac
    ```bash
    mvn javafx::run
 
-![Menu Screen](screenshots/main_menu.png)
-![Gameplay](screenshots/gameScene.png)
-![Settings](screenshots/Settings.png)
+![Menu Screen](src/main/screenshots/main_menu.png)
+![Gameplay](src/main/screenshots/gameScene.png)
+![Settings](src/main/screenshots/Settings.png)
 
