@@ -20,3 +20,8 @@ A simple typing game built with **JavaFX** and **Maven**. Test your speed and ac
 2. Inside the quicktype directory run the file:
    ```bash
    mvn javafx::run
+
+![Menu Screen](screenshots/main_menu.png)
+![Gameplay](screenshots/gameScene.png)
+![Settings](screenshots/Settings.png)
+
