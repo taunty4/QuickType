@@ -174,7 +174,7 @@ public class Main extends Application {
         backToMenu.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color:#e2b714");
         backToMenu.setOnAction(event -> showMenu());
 
-        winLayout.getChildren().addAll(winTitle, rawWpmResult, wpmResult, accuracy, backToMenu);
+        winLayout.getChildren().addAll(winTitle, wpmResult, rawWpmResult, accuracy, backToMenu);
 
         Scene winScreen = new Scene(winLayout, 900, 500);
         stage.setScene(winScreen);
@@ -210,7 +210,7 @@ public class Main extends Application {
         }
 
         gameLayout.getChildren().addAll(typingWords, backToMenu);
-        updateLetterColor(0, "", true);
+        updateLetterColour(0, "", true);
         Scene gameScene = new Scene(gameLayout, 900, 500);
 
         gameScene.setOnKeyTyped(event -> {
@@ -221,16 +221,16 @@ public class Main extends Application {
             String typedChar = event.getCharacter();
             char expectedChar = word.charAt(currentIndex);
             if (typedChar.equals(String.valueOf(expectedChar))){
-                updateLetterColor(currentIndex, getTypedColour(), false);
+                updateLetterColour(currentIndex, getTypedColour(), false);
                 currentIndex++;
             } else{
-                updateLetterColor(currentIndex, "#FF0000", false);
+                updateLetterColour(currentIndex, "#FF0000", false);
                 errors++;
                 currentIndex++;
             }
 
             if (currentIndex < typingWords.getChildren().size()){
-                updateLetterColor(currentIndex, getPrimaryColour(), true);
+                updateLetterColour(currentIndex, getPrimaryColour(), true);
             }
 
             if (currentIndex == typingWords.getChildren().size()){
@@ -248,7 +248,7 @@ public class Main extends Application {
     }
 
 
-    private void updateLetterColor(int index, String hexColour, boolean underlined){
+    private void updateLetterColour(int index, String hexColour, boolean underlined){
         if (index >= 0 && index < typingWords.getChildren().size()){
             Text letter = (Text) typingWords.getChildren().get(index);
             letter.setUnderline(underlined);
