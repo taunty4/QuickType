@@ -17,6 +17,6 @@ A simple typing game built with **JavaFX** and **Maven**. Test your speed and ac
 1. Clone the repository:
    ```bash
    git clone (https://github.com/YOUR_USERNAME/QuickType.git)
-2. Run the file:
+2. Inside the quicktype directory run the file:
    ```bash
    mvn javafx::run
