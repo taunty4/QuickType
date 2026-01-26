@@ -22,6 +22,8 @@ A simple typing game built with **JavaFX** and **Maven**. Test your speed and ac
    mvn javafx::run
 
 ![Menu Screen](src/main/screenshots/main_menu.png)
+
 ![Gameplay](src/main/screenshots/gameScene.png)
+
 ![Settings](src/main/screenshots/Settings.png)
 
