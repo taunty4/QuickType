@@ -1,12 +1,11 @@
 # QuickType ⌨️
 
-A sleek, fast-paced typing game built with **JavaFX** and **Maven**. Test your speed and accuracy against a custom word library!
+A simple typing game built with **JavaFX** and **Maven**. Test your speed and accuracy against a custom word library!
 
 ## 🚀 Features
 * **Dynamic Typing Engine:** Real-time feedback with color-coded character validation.
 * **Custom Vocabulary:** Loads words from a local `word_catalogue.txt` for endless variety.
-* **Responsive UI:** Multiple scenes including a Main Menu and a Results Screen.
-* **Performance Focused:** Lightweight build managed by Maven.
+* **Responsive UI:** Menu, Settings, Game scenes with customisable themes.
 * **Real-time Feedback:** Provides user with information regarding accuracy/wpm/raw wpm.
 
 ## 🛠️ Installation & Setup
