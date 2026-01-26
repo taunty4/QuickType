@@ -36,6 +36,8 @@ public class Main extends Application {
     private double wpm = 0;
     private double rawWpm = 0;
     private double accuracy = 0;
+    private String currentTheme = "Dark";
+    private int textWordCount = 5;
 
     AnimationTimer wpmTimer = new AnimationTimer() {
         @Override
@@ -43,6 +45,30 @@ public class Main extends Application {
             updateWPM(now);
         }
     };
+
+    private String getBackgroundColour(){
+        return switch (currentTheme) {
+            case "Light" -> "#ffffff";
+            case "Cyberpunk" -> "#0F0A1E";
+            default -> "#323437";
+        };
+    }
+
+    private String getPrimaryColour(){
+        return switch (currentTheme){
+            case "Light" -> "#d5d5d5";
+            case "Cyberpunk" -> "#E5E7EB";
+            default -> "#646669";
+        };
+    }
+
+    private String getTypedColour(){
+        return switch (currentTheme){
+            case "Light" -> "#000000";
+            case "Cyberpunk" -> "#00F0FF";
+            default -> "#ffffff";
+        };
+    }
 
     private void updateWPM(long now){
         if (startNanoTime == 0){
@@ -97,7 +123,7 @@ public class Main extends Application {
 
     private void showMenu(){
         VBox menuLayout = new VBox(20);
-        menuLayout.setStyle("-fx-background-color: #323437;");
+        menuLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
         menuLayout.setAlignment(Pos.CENTER);
 
         Text menuTitle = new Text("QUICKTYPE");
@@ -125,7 +151,7 @@ public class Main extends Application {
         String formattedRawWPM = String.format("%.2f", rawWpm);
         String formattedAccuracy = String.format("%.2f", accuracy);
         VBox winLayout = new VBox(20);
-        winLayout.setStyle("-fx-background-color: #323437;");
+        winLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
         winLayout.setAlignment(Pos.CENTER);
 
         Text winTitle = new Text("TEST FINISHED");
@@ -165,7 +191,7 @@ public class Main extends Application {
         wpm = 0;
         currentIndex = 0;
         VBox gameLayout = new VBox(20);
-        gameLayout.setStyle("-fx-background-color: #323437;");
+        gameLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
         gameLayout.setAlignment(Pos.CENTER);
 
         Button backToMenu = new Button("Menu");
@@ -178,13 +204,13 @@ public class Main extends Application {
         String word = wordManager.sentenceRandomiser(5);
         for (char c : word.toCharArray()){
             Text letter = new Text(String.valueOf(c));
-            letter.setFill(Color.web("#646669"));
+            letter.setFill(Color.web(getPrimaryColour()));
             letter.setStyle("-fx-font-size: 32px; -fx-font-family: 'monospace';");
             typingWords.getChildren().add(letter);
         }
 
         gameLayout.getChildren().addAll(typingWords, backToMenu);
-        updateLetterColor(0, Color.web("#646669"), true);
+        updateLetterColor(0, "", true);
         Scene gameScene = new Scene(gameLayout, 900, 500);
 
         gameScene.setOnKeyTyped(event -> {
@@ -195,16 +221,16 @@ public class Main extends Application {
             String typedChar = event.getCharacter();
             char expectedChar = word.charAt(currentIndex);
             if (typedChar.equals(String.valueOf(expectedChar))){
-                updateLetterColor(currentIndex, Color.WHITE, false);
+                updateLetterColor(currentIndex, getTypedColour(), false);
                 currentIndex++;
             } else{
-                updateLetterColor(currentIndex, Color.RED, false);
+                updateLetterColor(currentIndex, "#FF0000", false);
                 errors++;
                 currentIndex++;
             }
 
             if (currentIndex < typingWords.getChildren().size()){
-                updateLetterColor(currentIndex, Color.web("#646669"), true);
+                updateLetterColor(currentIndex, getPrimaryColour(), true);
             }
 
             if (currentIndex == typingWords.getChildren().size()){
@@ -221,17 +247,22 @@ public class Main extends Application {
         gameLayout.requestFocus();
     }
 
-    private void updateLetterColor(int index, Color colour, boolean underlined){
+
+    private void updateLetterColor(int index, String hexColour, boolean underlined){
         if (index >= 0 && index < typingWords.getChildren().size()){
             Text letter = (Text) typingWords.getChildren().get(index);
             letter.setUnderline(underlined);
-            letter.setFill(colour);
+
+            // Makes it so first letter isn't coloured until "key press"
+            if (hexColour != null && !hexColour.isEmpty()){
+                letter.setFill(Color.web(hexColour));
+            }
         }
     }
 
     private void showSettings(){
         GridPane settingsLayout = new GridPane();
-        settingsLayout.setStyle("-fx-background-color: #323437");
+        settingsLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
         settingsLayout.setAlignment(Pos.TOP_LEFT);
         settingsLayout.setHgap(40);
         settingsLayout.setVgap(20);
@@ -239,21 +270,30 @@ public class Main extends Application {
         Text wordCount = new Text("Word Count:");
         Text fillerSpace = new Text();
         wordCount.setFont(new Font(24));
-        wordCount.setFill(Color.WHITE);
+        wordCount.setFill(Color.web("#e2b714"));
+        wordCount.setStyle("-fx-font-weight: bold;");
+
 
         ChoiceBox<Integer> wordCountBox = new ChoiceBox<>();
         wordCountBox.setPrefSize(100,40);
-        wordCountBox.getItems().addAll(10, 25, 50);
-        wordCountBox.setValue(25);
+        wordCountBox.getItems().addAll(5, 10, 25, 50);
+        wordCountBox.setValue(textWordCount);
 
         Text themeSelection = new Text("Select Theme:");
         themeSelection.setFont(new Font(24));
-        themeSelection.setFill(Color.WHITE);
+        themeSelection.setFill(Color.web("#e2b714"));
+        themeSelection.setStyle("-fx-font-weight: bold;");
 
         ChoiceBox<String> choiceOfTheme = new ChoiceBox<>();
         choiceOfTheme.setPrefSize(100,40);
-        choiceOfTheme.getItems().addAll("Default", "Light", "Neon");
-        choiceOfTheme.setValue("Default");
+        choiceOfTheme.getItems().addAll("Dark", "Light", "Cyberpunk");
+        choiceOfTheme.setValue(currentTheme);
+
+        choiceOfTheme.setOnAction(event -> {
+            currentTheme = choiceOfTheme.getValue();
+            settingsLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
+            System.out.println("Theme changed to: " + currentTheme);
+        });
 
         Button backToMenu = new Button("Menu");
         backToMenu.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color:#e2b714");
