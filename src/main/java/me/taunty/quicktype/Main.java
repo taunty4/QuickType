@@ -1,5 +1,6 @@
 package me.taunty.quicktype;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -27,8 +28,38 @@ public class Main extends Application {
     private Stage stage;
     private WordManager wordManager;
     private int currentIndex = 0;
-
     private TextFlow typingWords;
+    private long startNanoTime = 0;
+    private int errors = 0;
+    private boolean isTimerRunning = false;
+    private double secondsElapsed = 0;
+    private double wpm = 0;
+    private double rawWpm = 0;
+    private double accuracy = 0;
+
+    AnimationTimer wpmTimer = new AnimationTimer() {
+        @Override
+        public void handle(long now) {
+            updateWPM(now);
+        }
+    };
+
+    private void updateWPM(long now){
+        if (startNanoTime == 0){
+            startNanoTime = now;
+        }
+        secondsElapsed = (now - startNanoTime) / 1000000000.0;
+        if (secondsElapsed > 0){
+            double minutes = secondsElapsed / 60.0;
+            rawWpm = (currentIndex / 5.0) / minutes;
+
+            int correctChars = currentIndex - errors;
+            wpm = (correctChars / 5.0) / minutes;
+
+            accuracy = ((double)correctChars / currentIndex) * 100;
+
+        }
+    }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -90,6 +121,9 @@ public class Main extends Application {
     }
 
     private void winScreen(){
+        String formattedWPM = String.format("%.2f", wpm);
+        String formattedRawWPM = String.format("%.2f", rawWpm);
+        String formattedAccuracy = String.format("%.2f", accuracy);
         VBox winLayout = new VBox(20);
         winLayout.setStyle("-fx-background-color: #323437;");
         winLayout.setAlignment(Pos.CENTER);
@@ -98,11 +132,23 @@ public class Main extends Application {
         winTitle.setFill(Color.web("#e2b714"));
         winTitle.setStyle("-fx-font-size: 48px; -fx-font-weight: bold;");
 
+        Text rawWpmResult = new Text("Raw WPM: " + formattedRawWPM);
+        rawWpmResult.setFill(Color.web("#be95ff"));
+        rawWpmResult.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        Text wpmResult = new Text("True WPM: " + formattedWPM);
+        wpmResult.setFill(Color.web("#be95ff"));
+        wpmResult.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        Text accuracy = new Text("Accuracy: %" + formattedAccuracy);
+        accuracy.setFill(Color.web("#be95ff"));
+        accuracy.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
         Button backToMenu = new Button("Menu");
         backToMenu.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color:#e2b714");
         backToMenu.setOnAction(event -> showMenu());
 
-        winLayout.getChildren().addAll(winTitle, backToMenu);
+        winLayout.getChildren().addAll(winTitle, rawWpmResult, wpmResult, accuracy, backToMenu);
 
         Scene winScreen = new Scene(winLayout, 900, 500);
         stage.setScene(winScreen);
@@ -112,6 +158,11 @@ public class Main extends Application {
     }
 
     private void showGame(){
+        startNanoTime = 0;
+        errors = 0;
+        isTimerRunning = false;
+        secondsElapsed = 0;
+        wpm = 0;
         currentIndex = 0;
         VBox gameLayout = new VBox(20);
         gameLayout.setStyle("-fx-background-color: #323437;");
@@ -120,8 +171,6 @@ public class Main extends Application {
         Button backToMenu = new Button("Menu");
         backToMenu.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color:#e2b714");
         backToMenu.setOnAction(event -> showMenu());
-
-
 
         typingWords = new TextFlow();
         typingWords.setMaxWidth(600);
@@ -139,6 +188,10 @@ public class Main extends Application {
         Scene gameScene = new Scene(gameLayout, 900, 500);
 
         gameScene.setOnKeyTyped(event -> {
+            if (!isTimerRunning){
+                wpmTimer.start();
+                isTimerRunning = true;
+            }
             String typedChar = event.getCharacter();
             char expectedChar = word.charAt(currentIndex);
             if (typedChar.equals(String.valueOf(expectedChar))){
@@ -146,6 +199,7 @@ public class Main extends Application {
                 currentIndex++;
             } else{
                 updateLetterColor(currentIndex, Color.RED, false);
+                errors++;
                 currentIndex++;
             }
 
@@ -154,6 +208,8 @@ public class Main extends Application {
             }
 
             if (currentIndex == typingWords.getChildren().size()){
+                wpmTimer.stop();
+
                 winScreen();
             }
 
