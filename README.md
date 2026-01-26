@@ -18,3 +18,6 @@ A sleek, fast-paced typing game built with **JavaFX** and **Maven**. Test your s
 1. Clone the repository:
    ```bash
    git clone (https://github.com/YOUR_USERNAME/QuickType.git)
+2. Run the file:
+   ```bash
+   mvn javafx::run
