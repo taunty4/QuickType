@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -19,10 +20,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Scanner;
 
 public class Main extends Application {
     private Stage stage;
@@ -45,6 +42,7 @@ public class Main extends Application {
             updateWPM(now);
         }
     };
+
 
     private String getBackgroundColour(){
         return switch (currentTheme) {
@@ -82,10 +80,28 @@ public class Main extends Application {
             int correctChars = currentIndex - errors;
             wpm = (correctChars / 5.0) / minutes;
 
-            accuracy = ((double)correctChars / currentIndex) * 100;
+            if (currentIndex>0){
+                accuracy = ((double)correctChars / currentIndex) * 100;
+            }
 
         }
     }
+
+    private void handleBackspace(){
+        if (currentIndex > 0){
+            currentIndex--;
+            updateLetterColour(currentIndex, getPrimaryColour(), true);
+            Text previousNode = (Text) typingWords.getChildren().get(currentIndex);
+            if (previousNode.getFill().equals(Color.web("#FF0000"))){
+                errors--;
+            }
+
+            if (currentIndex+1 < typingWords.getChildren().size()){
+                updateLetterColour(currentIndex+1, getPrimaryColour(), false);
+            }
+        }
+    }
+
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -201,7 +217,7 @@ public class Main extends Application {
         typingWords = new TextFlow();
         typingWords.setMaxWidth(600);
         typingWords.setTextAlignment(TextAlignment.CENTER);
-        String word = wordManager.sentenceRandomiser(5);
+        String word = wordManager.sentenceRandomiser(textWordCount);
         for (char c : word.toCharArray()){
             Text letter = new Text(String.valueOf(c));
             letter.setFill(Color.web(getPrimaryColour()));
@@ -214,12 +230,18 @@ public class Main extends Application {
         Scene gameScene = new Scene(gameLayout, 900, 500);
 
         gameScene.setOnKeyTyped(event -> {
-            if (!isTimerRunning){
+            if (!isTimerRunning) {
                 wpmTimer.start();
                 isTimerRunning = true;
             }
+
+            if (event.getCharacter().equals("\b")){
+                return;
+            }
+
             String typedChar = event.getCharacter();
             char expectedChar = word.charAt(currentIndex);
+
             if (typedChar.equals(String.valueOf(expectedChar))){
                 updateLetterColour(currentIndex, getTypedColour(), false);
                 currentIndex++;
@@ -239,6 +261,12 @@ public class Main extends Application {
                 winScreen();
             }
 
+        });
+
+        gameScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.BACK_SPACE) {
+                handleBackspace();
+            }
         });
 
 
@@ -276,7 +304,7 @@ public class Main extends Application {
 
         ChoiceBox<Integer> wordCountBox = new ChoiceBox<>();
         wordCountBox.setPrefSize(100,40);
-        wordCountBox.getItems().addAll(5, 10, 25, 50);
+        wordCountBox.getItems().addAll(5, 10, 25);
         wordCountBox.setValue(textWordCount);
 
         Text themeSelection = new Text("Select Theme:");
@@ -293,6 +321,11 @@ public class Main extends Application {
             currentTheme = choiceOfTheme.getValue();
             settingsLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
             System.out.println("Theme changed to: " + currentTheme);
+        });
+
+        wordCountBox.setOnAction(event ->{
+            textWordCount = wordCountBox.getValue();
+            System.out.println("New word amount: " + textWordCount);
         });
 
         Button backToMenu = new Button("Menu");
