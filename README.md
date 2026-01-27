@@ -4,7 +4,7 @@ A simple typing game built with **JavaFX** and **Maven**. Test your speed and ac
 
 ## Features
 * **Custom Vocabulary:** Loads words from a local `word_catalogue.txt` for endless variety.
-* **Responsive UI:** Menu, Settings, Game scenes with customisable themes.
+* **Responsive UI:** Menu, Settings, Game scenes with customisable themes and word counts.
 * **Real-time Feedback:** Provides user with information regarding accuracy/wpm/raw wpm.
 
 ## Installation & Setup
