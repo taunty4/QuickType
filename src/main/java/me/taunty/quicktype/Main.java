@@ -10,6 +10,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -43,7 +44,7 @@ public class Main extends Application {
         }
     };
 
-
+    // Declares background colour for respected theme
     private String getBackgroundColour(){
         return switch (currentTheme) {
             case "Light" -> "#ffffff";
@@ -52,6 +53,7 @@ public class Main extends Application {
         };
     }
 
+    // Declares typeable letter colour for respected theme
     private String getPrimaryColour(){
         return switch (currentTheme){
             case "Light" -> "#d5d5d5";
@@ -60,6 +62,7 @@ public class Main extends Application {
         };
     }
 
+    // Declares typed colour for respected theme
     private String getTypedColour(){
         return switch (currentTheme){
             case "Light" -> "#000000";
@@ -68,6 +71,7 @@ public class Main extends Application {
         };
     }
 
+    // Calculates the users WPM using elapsed time and correct character count
     private void updateWPM(long now){
         if (startNanoTime == 0){
             startNanoTime = now;
@@ -87,6 +91,7 @@ public class Main extends Application {
         }
     }
 
+    // Moves cursor back by one, recalculating error count and resetting visual style of character.
     private void handleBackspace(){
         if (currentIndex > 0){
             currentIndex--;
@@ -101,6 +106,7 @@ public class Main extends Application {
             }
         }
     }
+
 
 
     @Override
@@ -137,6 +143,7 @@ public class Main extends Application {
 
     }
 
+    // Constructs and displays the main menu scene.
     private void showMenu(){
         VBox menuLayout = new VBox(20);
         menuLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
@@ -162,43 +169,70 @@ public class Main extends Application {
         menuLayout.requestFocus();
     }
 
+    // Constructs and displays the scene post test.
     private void winScreen(){
         String formattedWPM = String.format("%.2f", wpm);
         String formattedRawWPM = String.format("%.2f", rawWpm);
         String formattedAccuracy = String.format("%.2f", accuracy);
-        VBox winLayout = new VBox(20);
-        winLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
-        winLayout.setAlignment(Pos.CENTER);
+
+        double currentBest = ScoreManager.getHighScore();
+        boolean isNewRecord = false;
+
+        if (wpm > currentBest){
+            ScoreManager.saveHighScore(wpm);
+            currentBest = wpm;
+            isNewRecord = true;
+
+        }
 
         Text winTitle = new Text("TEST FINISHED");
         winTitle.setFill(Color.web("#e2b714"));
         winTitle.setStyle("-fx-font-size: 48px; -fx-font-weight: bold;");
 
         Text rawWpmResult = new Text("Raw WPM: " + formattedRawWPM);
-        rawWpmResult.setFill(Color.web("#be95ff"));
+        rawWpmResult.setFill(Color.web("#e2b714"));
         rawWpmResult.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
+        Text bestWPM = new Text("New personal best: " + String.format("%.2f",currentBest) + " WPM");
+        bestWPM.setFill(Color.web("#00FF9F"));
+        bestWPM.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
         Text wpmResult = new Text("True WPM: " + formattedWPM);
-        wpmResult.setFill(Color.web("#be95ff"));
+        wpmResult.setFill(Color.web("#e2b714"));
         wpmResult.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        Text accuracy = new Text("Accuracy: %" + formattedAccuracy);
-        accuracy.setFill(Color.web("#be95ff"));
+        Text accuracy = new Text("Accuracy: " + formattedAccuracy + "%");
+        accuracy.setFill(Color.web("#e2b714"));
         accuracy.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
         Button backToMenu = new Button("Menu");
         backToMenu.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color:#e2b714");
         backToMenu.setOnAction(event -> showMenu());
 
-        winLayout.getChildren().addAll(winTitle, wpmResult, rawWpmResult, accuracy, backToMenu);
+        Button restartButton = new Button("Restart");
+        restartButton.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color:#e2b714");
+        restartButton.setOnAction(event -> showGame());
 
-        Scene winScreen = new Scene(winLayout, 900, 500);
+        GridPane successLayout = new GridPane();
+        successLayout.setAlignment(Pos.BOTTOM_CENTER);
+        successLayout.setHgap(70);
+
+        VBox statsLayout = new VBox(20);
+        statsLayout.getChildren().addAll(winTitle, bestWPM, wpmResult, rawWpmResult, accuracy, successLayout);
+        statsLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
+        statsLayout.setAlignment(Pos.CENTER);
+
+        successLayout.add(backToMenu, 0, 0);
+        successLayout.add(restartButton, 1, 0);
+
+        Scene winScreen = new Scene(statsLayout, 900, 500);
         stage.setScene(winScreen);
         stage.show();
-        winLayout.requestFocus();
+        statsLayout.requestFocus();
 
     }
 
+    // Constructs and displays the main game typing scene.
     private void showGame(){
         startNanoTime = 0;
         errors = 0;
@@ -275,7 +309,7 @@ public class Main extends Application {
         gameLayout.requestFocus();
     }
 
-
+    // Changes letter colour from "typeable" to "typed"
     private void updateLetterColour(int index, String hexColour, boolean underlined){
         if (index >= 0 && index < typingWords.getChildren().size()){
             Text letter = (Text) typingWords.getChildren().get(index);
@@ -288,6 +322,7 @@ public class Main extends Application {
         }
     }
 
+    // Constructs and displays the settings scene.
     private void showSettings(){
         GridPane settingsLayout = new GridPane();
         settingsLayout.setStyle("-fx-background-color: " + getBackgroundColour() + ";");
@@ -346,6 +381,7 @@ public class Main extends Application {
 
     }
 
+    // Constructs and displays the error scene, providing user with information if difficulty obtaining text file.
     private void showErrorOnScreen(String message){
         VBox errorLayout = new VBox(20);
         errorLayout.setStyle("-fx-background-color: #323437;");
